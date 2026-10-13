@@ -2,7 +2,6 @@ package com.thanpisitkub.mod;
 
 import com.mojang.logging.LogUtils;
 import com.thanpisitkub.mod.net.NetworkHandler;
-import com.thanpisitkub.mod.registry.ModItems;
 import com.thanpisitkub.mod.registry.ModParticles;
 import com.thanpisitkub.mod.registry.ModSounds;
 import net.minecraft.resources.ResourceLocation;
@@ -24,8 +23,6 @@ public class ThanpisitkubMod {
 
         ModParticles.PARTICLES.register(modBus);
         ModSounds.SOUNDS.register(modBus);
-        ModItems.ITEMS.register(modBus);
-        ModItems.TABS.register(modBus);
 
         PowerConfig.register();
         NetworkHandler.register();

@@ -9,7 +9,6 @@ import com.thanpisitkub.mod.registry.ModParticles;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -18,7 +17,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.Map;
 
-/** Mod-bus client registration: keybinds, particle providers, definition reload listener, animation layer. */
+/** Mod-bus client registration: particle providers, definition reload listener, animation layer. */
 @Mod.EventBusSubscriber(modid = ThanpisitkubMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class ClientSetup {
     private ClientSetup() {
@@ -33,13 +32,6 @@ public final class ClientSetup {
                 ThanpisitkubMod.LOGGER.warn("Player Animation Library not found - install it to see the move animations.");
             }
         });
-    }
-
-    @SubscribeEvent
-    public static void onRegisterKeys(RegisterKeyMappingsEvent event) {
-        event.register(ClientKeys.GALAXY_IMPACT);
-        event.register(ClientKeys.GALAXY_DIVIDE);
-        event.register(ClientKeys.CANCEL);
     }
 
     @SubscribeEvent

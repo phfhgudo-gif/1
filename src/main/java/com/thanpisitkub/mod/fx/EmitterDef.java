@@ -136,6 +136,14 @@ public final class EmitterDef {
     }
 
     /** Evaluates the curves and the width/height expressions. {@code out} = {halfWidth, halfHeight}. */
+    /** Rough total time (seconds) an emitter of this kind is visible: emission time + particle lifetime. */
+    public double approxDuration() {
+        Expr.Ctx c = new Expr.Ctx();
+        c.rng = new java.util.Random(1);
+        double life = lifetime.eval(c);
+        return (mode == Mode.STEADY ? activeSeconds : 0.0) + Math.max(life, 0.1);
+    }
+
     public void sizeAt(Expr.Ctx c, double[] out) {
         Curve sc = curves.get("size");
         if (sc != null) c.size = sc.eval(c);

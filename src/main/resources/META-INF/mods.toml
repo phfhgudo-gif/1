@@ -39,3 +39,12 @@ description='''${mod_description}'''
     versionRange="[1.0.0,)"
     ordering="AFTER"
     side="CLIENT"
+
+# Origins: gives the "Thanpisitkub" origin whose two powers (primary / secondary ability keys) cast the moves.
+# Optional so the mod still loads without it (moves can then only be cast with /thanpisitkub cast).
+[[dependencies.${mod_id}]]
+    modId="origins"
+    mandatory=false
+    versionRange="[1.0,)"
+    ordering="AFTER"
+    side="BOTH"

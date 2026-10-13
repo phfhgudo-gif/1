@@ -45,15 +45,10 @@ public final class Moves {
     private static MoveDef galaxyImpact() {
         MoveDef.Builder b = MoveDef.builder("galaxy_impact", 0, "galaxy_impact", 27.0);
 
-        // --- sound -------------------------------------------------------------------------
-        b.sound(0.0, "garp_ult1", 3.0f, 1.0f);
-        b.sound(0.0, "galaxy_impact_theme", 0.5f, 1.0f);
-        b.sound(3.4, "galaxy", 3.0f, 1.0f);
-        b.sound(6.9, "impact", 3.0f, 1.0f);
-        b.sound(13.9, "impact", 3.0f, 1.05f);
-        b.sound(15.4, "impact", 3.0f, 1.1f);
-        b.sound(17.4, "impact", 3.0f, 0.8f);
-        b.sound(19.0, "impact", 3.0f, 0.7f);
+        // --- sound: ONE main track (it already contains the voice + hits); only two quiet accents on top ----
+        b.sound(0.0, "garp_ult1", 1.0f, 1.0f);
+        b.sound(3.4, "galaxy", 0.45f, 1.0f);
+        b.sound(17.4, "impact", 0.6f, 0.85f);
 
         // --- camera ------------------------------------------------------------------------------
         b.shake(0.5, 0.4, 2.8);
@@ -146,13 +141,10 @@ public final class Moves {
     private static MoveDef galaxyDivide() {
         MoveDef.Builder b = MoveDef.builder("galaxy_divide", 1, "galaxy_divide", 27.5);
 
-        // --- sound -------------------------------------------------------------------------
-        b.sound(0.0, "garp_galaxydivide", 3.0f, 1.0f);
-        b.sound(1.5, "impact", 2.0f, 1.2f);
-        b.sound(6.5, "impact", 2.0f, 1.1f);
-        b.sound(16.4, "impact", 3.0f, 0.9f);
-        b.sound(22.0, "galaxy", 3.0f, 0.9f);
-        b.sound(22.4, "impact", 3.0f, 0.8f);
+        // --- sound: ONE main track; two quiet accents on top ---------------------------------------
+        b.sound(0.0, "garp_galaxydivide", 1.0f, 1.0f);
+        b.sound(16.4, "impact", 0.6f, 0.9f);
+        b.sound(22.2, "galaxy", 0.5f, 0.9f);
 
         // --- camera ------------------------------------------------------------------------------
         b.shake(0.0, 0.6, 1.5);

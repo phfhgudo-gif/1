@@ -17,10 +17,6 @@ public final class NetworkHandler {
 
     public static void register() {
         int id = 0;
-        CHANNEL.registerMessage(id++, CastRequestPacket.class,
-                CastRequestPacket::encode, CastRequestPacket::decode, CastRequestPacket::handle);
-        CHANNEL.registerMessage(id++, CancelRequestPacket.class,
-                CancelRequestPacket::encode, CancelRequestPacket::decode, CancelRequestPacket::handle);
         CHANNEL.registerMessage(id++, MoveStatePacket.class,
                 MoveStatePacket::encode, MoveStatePacket::decode, MoveStatePacket::handle);
     }

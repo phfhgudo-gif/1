@@ -5,7 +5,6 @@ import com.thanpisitkub.mod.ThanpisitkubMod;
 import com.thanpisitkub.mod.move.MoveDef;
 import com.thanpisitkub.mod.net.MoveStatePacket;
 import com.thanpisitkub.mod.net.NetworkHandler;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,7 +32,7 @@ import java.util.UUID;
 
 /**
  * Server side of the moves: starts / ends them, applies the damage events of the timeline,
- * handles cooldowns and tells every client that can see the caster to play the visuals.
+ * and tells every client that can see the caster to play the visuals.
  */
 @Mod.EventBusSubscriber(modid = ThanpisitkubMod.MOD_ID)
 public final class ServerMoveManager {
@@ -51,38 +50,18 @@ public final class ServerMoveManager {
     }
 
     private static final Map<UUID, ActiveCast> CASTS = new HashMap<>();
-    private static final Map<UUID, Long> COOLDOWN_UNTIL = new HashMap<>(); // game time (ticks)
 
     public static boolean isCasting(UUID id) {
         return CASTS.containsKey(id);
     }
 
-    /** Normal cast (checks cooldown + not already casting). The power check is done by the caller. */
-    public static boolean tryCast(ServerPlayer player, MoveDef move) {
-        if (!player.isAlive() || player.isSpectator()) return false;
-        if (CASTS.containsKey(player.getUUID())) return false;
-
-        long now = player.serverLevel().getGameTime();
-        Long until = COOLDOWN_UNTIL.get(player.getUUID());
-        if (until != null && until > now) {
-            long secondsLeft = (until - now + 19) / 20;
-            player.displayClientMessage(Component.translatable("message.thanpisitkub.cooldown", secondsLeft), true);
-            return false;
-        }
-
-        CASTS.put(player.getUUID(), new ActiveCast(move));
-        int cooldownSeconds = move.index == 0 ? PowerConfig.COOLDOWN_IMPACT_SECONDS.get() : PowerConfig.COOLDOWN_DIVIDE_SECONDS.get();
-        COOLDOWN_UNTIL.put(player.getUUID(), now + move.totalTicks + cooldownSeconds * 20L);
-        send(player, move.index, MoveStatePacket.START);
-        return true;
-    }
-
-    /** Admin / datapack cast: ignores the cooldown and replaces a running move. */
-    public static boolean forceCast(ServerPlayer player, MoveDef move) {
+    /** Starts a move for the player (replaces a move that is still running). Cooldown is handled by the Origins power. */
+    public static boolean cast(ServerPlayer player, MoveDef move) {
         if (!player.isAlive() || player.isSpectator()) return false;
         cancel(player);
-        COOLDOWN_UNTIL.remove(player.getUUID());
-        return tryCast(player, move);
+        CASTS.put(player.getUUID(), new ActiveCast(move));
+        send(player, move.index, MoveStatePacket.START);
+        return true;
     }
 
     public static void cancel(ServerPlayer player) {
@@ -204,6 +183,5 @@ public final class ServerMoveManager {
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         CASTS.clear();
-        COOLDOWN_UNTIL.clear();
     }
 }

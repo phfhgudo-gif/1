@@ -2,9 +2,16 @@
   "type": "apoli:active_self",
   "entity_action": {
     "type": "apoli:execute_command",
-    "command": "thanpisitkub cast galaxy_divide @s"
+    "command": "thanpisitkub cast galaxy_divide @s",
+    "permission_level": 4
   },
   "cooldown": 1200,
-  "hud_render": { "should_render": true, "bar_index": 1 },
-  "key": { "key": "key.origins.secondary_active", "continuous": false }
+  "hud_render": {
+    "should_render": true,
+    "bar_index": 1
+  },
+  "key": {
+    "key": "key.origins.secondary_active",
+    "continuous": false
+  }
 }

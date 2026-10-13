@@ -18,20 +18,23 @@ mod id: `thanpisitkub` · Minecraft 1.20.1 · Forge 47.x · Java 17
 ./gradlew runClient      # ทดสอบในเกม
 ```
 
-## วิธีเล่น
-1. รับพลัง: ใช้ไอเท็ม **Thanpisitkub Core** (แท็บ creative "Thanpisitkub Power") คลิกขวา
-   หรือ `/thanpisitkub power on [ผู้เล่น]` (op)
-2. กด **Z** = Galaxy Impact · **X** = Galaxy Divide · **V** = ยกเลิกท่า (เปลี่ยนปุ่มได้ใน Controls)
+## วิธีเล่น (ผ่านม็อด Origins)
+ต้องติดตั้งม็อด **Origins** (1.20.1 Forge) คู่กับม็อดนี้
+1. เลือก Origin **Thanpisitkub** ตอนเข้าโลก (หรือใช้ Orb of Origin) — หรือพิมพ์
+   `/origin set @s origins:origin thanpisitkub:thanpisitkub`
+2. กดปุ่มของ Origins: **Primary Active Ability** = Galaxy Impact · **Secondary Active Ability** = Galaxy Divide
+   (ตั้งปุ่มได้ใน Options → Controls → หมวด Origins) คูลดาวน์ 60 วินาที แก้ได้ที่ `cooldown` (หน่วย tick) ใน
+   `data/thanpisitkub/powers/*.json`
 3. ระหว่างใช้ท่า: เล่น animation + particle + เสียง, ตัวละครถูกล็อกการเคลื่อนที่, กล้องเป็นมุมมองบุคคลที่สาม,
    ไม่ได้รับดาเมจ (ปรับได้ใน config)
 
-คำสั่ง (op): `/thanpisitkub cast <galaxy_impact|galaxy_divide> [ผู้เล่น]`, `/thanpisitkub cancel [ผู้เล่น]`,
-`/thanpisitkub power <on|off> [ผู้เล่น]`
+ไม่มีไอเท็มและไม่มีปุ่มของม็อดนี้เองแล้ว
+คำสั่ง: `/thanpisitkub cancel` (ทุกคน, ยกเลิกท่าตัวเอง), op: `/thanpisitkub cast <galaxy_impact|galaxy_divide> [ผู้เล่น]`
 ทดสอบ particle เดี่ยว ๆ: `/particle thanpisitkub:garp_galaxydivide1 ~ ~2 ~`
 
 ## Config
-- `config/thanpisitkub-common-v2.toml`: cooldown, ตัวคูณดาเมจ, requirePower, invulnerableWhileCasting
-- `config/thanpisitkub-client-v2.toml`: **effectScale** (ค่าเริ่มต้น 1.0), **particleDensity** (0.6), cameraShake, lock/third-person
+- `config/thanpisitkub-common-v2.toml`: ตัวคูณดาเมจ, invulnerableWhileCasting
+- `config/thanpisitkub-client-v2.toml`: **effectScale** (ค่าเริ่มต้น 1.0), **particleDensity** (0.6), cameraShake, **soundVolume** (0.6), **originalAnimation** (false = ท่า 'safe', true = ท่าต้นฉบับ), lock/third-person
 
 `effectScale = 1.0` = ตัวเลขขนาด/รัศมี/ความเร็วตามไฟล์ particle ต้นฉบับเป๊ะ ๆ (ขนาดอนิเมะ ใหญ่หลายสิบบล็อก)
 ถ้าเอฟเฟกต์ใหญ่จนแลค (โดยเฉพาะมือถือ) ให้ลด `particleDensity` เป็น 0.2-0.4 ก่อน
@@ -56,7 +59,8 @@ mod id: `thanpisitkub` · Minecraft 1.20.1 · Forge 47.x · Java 17
 
 - PAL 1.0.2 อ่านค่า rotation แบบ array เป็น **step (ค้างค่า ไม่ interpolate)** ถ้า keyframe ห่างกัน ท่าจะกระตุก/ค้างเป็นช่วง ๆ
   จึงแปลงไฟล์ท่าให้มี keyframe **ทุก tick** ด้วย `tools/resample_animation.py` (ไฟล์ต้นฉบับของคุณเก็บไว้ที่ `tools/original_animations/`)
-- ถ้าอยากแก้ท่าเอง: แก้ต้นฉบับ แล้วรัน `python3 tools/resample_animation.py <in.json> <out.json>`
+- ท่ามี 2 แบบ: `galaxy_*.json` (safe: จำกัดการพลิกลำตัว/การยกตัวที่สุดโต่ง) และ `galaxy_*_original.json` (ท่าต้นฉบับ) สลับด้วย `originalAnimation` ใน client config
+- ถ้าอยากแก้ท่าเอง: แก้ไฟล์ใน `tools/original_animations/` แล้วรัน `python3 tools/build_animations.py`
 - (แก้คำอธิบายเดิม: ก่อนหน้านี้เคยบอกว่า bug มาจาก rotation ถูกอ่านเป็น radian — ตรวจโค้ดจริงแล้วไม่ใช่ PAL แปลงองศาเป็น radian ให้อยู่แล้ว)
 
 ## ข้อควรรู้

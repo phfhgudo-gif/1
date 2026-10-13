@@ -5,6 +5,8 @@ import com.thanpisitkub.mod.ThanpisitkubMod;
 import com.thanpisitkub.mod.client.anim.PalBridge;
 import com.thanpisitkub.mod.client.anim.PalCheck;
 import com.thanpisitkub.mod.client.fx.EmitterManager;
+import com.thanpisitkub.mod.client.fx.FxDefs;
+import com.thanpisitkub.mod.fx.EmitterDef;
 import com.thanpisitkub.mod.move.MoveDef;
 import com.thanpisitkub.mod.move.Moves;
 import com.thanpisitkub.mod.net.MoveStatePacket;
@@ -52,6 +54,8 @@ public final class ClientMoveManager {
         int tick = 0;
         int fxIndex = 0;
         int soundIndex = 0;
+        /** Recent emitters per particle: {tick, x, y, z}. Used so the same effect never stacks on itself. */
+        final Map<String, List<double[]>> recentFx = new HashMap<>();
 
         ClientCast(UUID id, MoveDef move, boolean local) {
             this.id = id;
@@ -86,7 +90,8 @@ public final class ClientMoveManager {
         CASTS.put(id, cast);
 
         if (PalCheck.isAvailable()) {
-            PalBridge.play(clientPlayer, ThanpisitkubMod.id(move.animation));
+            PalBridge.play(clientPlayer, ThanpisitkubMod.id(
+                    PowerConfig.ORIGINAL_ANIMATION.get() ? move.animation + "_original" : move.animation));
         } else if (!warnedMissingAnimationLib) {
             warnedMissingAnimationLib = true;
             ThanpisitkubMod.LOGGER.warn("Player Animation Library is not installed: Thanpisitkub moves will play without the body animation.");
@@ -148,7 +153,9 @@ public final class ClientMoveManager {
     private static void runTimeline(Minecraft mc, ClientCast cast, Player player) {
         MoveDef move = cast.move;
 
+        int spawnedThisTick = 0;
         while (cast.fxIndex < move.fx.size() && move.fx.get(cast.fxIndex).tick() <= cast.tick) {
+            if (spawnedThisTick >= MAX_EMITTERS_PER_TICK) break; // the rest runs next tick (no big lag spike)
             MoveDef.Fx fx = move.fx.get(cast.fxIndex++);
             float yaw = player.getYRot();
             double rad = Math.toRadians(yaw);
@@ -157,6 +164,8 @@ public final class ClientMoveManager {
             double x = player.getX() + fwdX * fx.forward() + leftX * fx.side();
             double y = player.getY() + fx.up();
             double z = player.getZ() + fwdZ * fx.forward() + leftZ * fx.side();
+            if (isStacked(cast, fx.particle(), x, y, z)) continue;
+            spawnedThisTick++;
             EmitterManager.spawn(fx.particle(), mc.level, x, y, z, yaw);
         }
 
@@ -164,12 +173,38 @@ public final class ClientMoveManager {
             MoveDef.Snd snd = move.sounds.get(cast.soundIndex++);
             SoundEvent event = ModSounds.get(snd.sound());
             if (event == null) continue;
-            // volume > 1 only extends how far away it can be heard; loudness is capped at 100 %
+            // never let two copies of the same sound overlap: cut the previous one first
+            for (Iterator<SoundInstance> si = cast.sounds.iterator(); si.hasNext(); ) {
+                SoundInstance old = si.next();
+                if (old.getLocation().equals(event.getLocation())) {
+                    mc.getSoundManager().stop(old);
+                    si.remove();
+                }
+            }
+            float volume = (float) (snd.volume() * PowerConfig.SOUND_VOLUME.get());
+            if (volume <= 0.0f) continue;
             SoundInstance instance = new EntityBoundSoundInstance(event, SoundSource.PLAYERS,
-                    snd.volume(), snd.pitch(), player, player.getRandom().nextLong());
+                    volume, snd.pitch(), player, player.getRandom().nextLong());
             mc.getSoundManager().play(instance);
             cast.sounds.add(instance);
         }
+    }
+
+    private static final int MAX_EMITTERS_PER_TICK = 5;
+    /** Two copies of the same effect closer than this (blocks) while the first is still visible = stacked. */
+    private static final double STACK_RADIUS = 5.0;
+
+    private static boolean isStacked(ClientCast cast, String particle, double x, double y, double z) {
+        EmitterDef def = FxDefs.get(particle);
+        double visibleTicks = (def == null ? 1.0 : def.approxDuration()) * 20.0 * 0.55;
+        List<double[]> list = cast.recentFx.computeIfAbsent(particle, k -> new ArrayList<>());
+        list.removeIf(e -> cast.tick - e[0] > visibleTicks);
+        for (double[] e : list) {
+            double dx = e[1] - x, dy = e[2] - y, dz = e[3] - z;
+            if (dx * dx + dy * dy + dz * dz < STACK_RADIUS * STACK_RADIUS) return true;
+        }
+        list.add(new double[]{cast.tick, x, y, z});
+        return false;
     }
 
     // ----------------------------------------------------- freeze the local player's input

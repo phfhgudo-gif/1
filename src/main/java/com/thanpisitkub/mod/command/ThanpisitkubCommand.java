@@ -8,7 +8,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.thanpisitkub.mod.ThanpisitkubMod;
 import com.thanpisitkub.mod.move.MoveDef;
 import com.thanpisitkub.mod.move.Moves;
-import com.thanpisitkub.mod.power.PowerData;
 import com.thanpisitkub.mod.server.ServerMoveManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -24,9 +23,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * /thanpisitkub power <on|off> [players]    (op) give / remove the power
- * /thanpisitkub cast <move> [players]       (op) start a move, ignores power + cooldown (used by the Origins power)
- * /thanpisitkub cancel [players]            (op) stop a running move
+ * /thanpisitkub cast <move> [players]       (op / Origins power) start a move
+ * /thanpisitkub cancel [players]            stop your own running move (players = op only)
  * Moves: galaxy_impact, galaxy_divide
  */
 @Mod.EventBusSubscriber(modid = ThanpisitkubMod.MOD_ID)
@@ -41,17 +39,8 @@ public final class ThanpisitkubCommand {
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
         d.register(Commands.literal("thanpisitkub")
-                .requires(s -> s.hasPermission(2))
-                .then(Commands.literal("power")
-                        .then(Commands.literal("on")
-                                .executes(c -> power(c, List.of(c.getSource().getPlayerOrException()), true))
-                                .then(Commands.argument("targets", EntityArgument.players())
-                                        .executes(c -> power(c, EntityArgument.getPlayers(c, "targets"), true))))
-                        .then(Commands.literal("off")
-                                .executes(c -> power(c, List.of(c.getSource().getPlayerOrException()), false))
-                                .then(Commands.argument("targets", EntityArgument.players())
-                                        .executes(c -> power(c, EntityArgument.getPlayers(c, "targets"), false)))))
                 .then(Commands.literal("cast")
+                        .requires(s -> s.hasPermission(2))
                         .then(Commands.argument("move", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(
                                         Moves.ALL.stream().map(m -> m.id), b))
@@ -61,25 +50,15 @@ public final class ThanpisitkubCommand {
                 .then(Commands.literal("cancel")
                         .executes(c -> cancel(c, List.of(c.getSource().getPlayerOrException())))
                         .then(Commands.argument("targets", EntityArgument.players())
+                                .requires(s -> s.hasPermission(2))
                                 .executes(c -> cancel(c, EntityArgument.getPlayers(c, "targets"))))));
-    }
-
-    private static int power(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> targets, boolean on) {
-        for (ServerPlayer p : targets) {
-            PowerData.set(p, on);
-            p.displayClientMessage(Component.translatable(
-                    on ? "message.thanpisitkub.power_on" : "message.thanpisitkub.power_off"), true);
-        }
-        ctx.getSource().sendSuccess(() -> Component.translatable(
-                on ? "commands.thanpisitkub.power.on" : "commands.thanpisitkub.power.off", targets.size()), true);
-        return targets.size();
     }
 
     private static int cast(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> targets) throws CommandSyntaxException {
         MoveDef move = Moves.byId(StringArgumentType.getString(ctx, "move"));
         if (move == null) throw UNKNOWN_MOVE.create();
         int ok = 0;
-        for (ServerPlayer p : targets) if (ServerMoveManager.forceCast(p, move)) ok++;
+        for (ServerPlayer p : targets) if (ServerMoveManager.cast(p, move)) ok++;
         final int n = ok;
         ctx.getSource().sendSuccess(() -> Component.translatable("commands.thanpisitkub.cast", move.id, n), true);
         return ok;

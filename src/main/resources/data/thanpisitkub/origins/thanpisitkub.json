@@ -3,7 +3,9 @@
     "thanpisitkub:galaxy_impact",
     "thanpisitkub:galaxy_divide"
   ],
-  "icon": { "item": "thanpisitkub:thanpisitkub_core" },
+  "icon": {
+    "item": "minecraft:nether_star"
+  },
   "order": 20,
   "impact": 3
 }

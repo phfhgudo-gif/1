@@ -1,10 +1,7 @@
 name: Build mod jar
-
 on:
   push:
-    branches: [main]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,5 +15,5 @@ jobs:
         run: chmod +x gradlew && ./gradlew build --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: thanpisitkub-mod-jar
+          name: thanpisitkub-jar
           path: build/libs/*.jar
