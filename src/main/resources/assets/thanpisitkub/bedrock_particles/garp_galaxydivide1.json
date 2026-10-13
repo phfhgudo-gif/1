@@ -1,0 +1,79 @@
+{
+ "name": "garp_galaxydivide1",
+ "additive": false,
+ "facing": "camera",
+ "frames": 7,
+ "flipbook": {
+  "fps": 12,
+  "max": 7,
+  "stretch": false,
+  "loop": true
+ },
+ "uv_random": false,
+ "emitter": {
+  "mode": "instant",
+  "count": "1",
+  "rate": "0",
+  "maxp": 1000,
+  "active": 1
+ },
+ "shape": {
+  "type": "point",
+  "radius": "0",
+  "offset": [
+   "0",
+   "0",
+   "0"
+  ]
+ },
+ "speed": "0",
+ "accel": [
+  "0",
+  "0",
+  "0"
+ ],
+ "drag": 0,
+ "lifetime": "1",
+ "size": [
+  "12",
+  "10"
+ ],
+ "tint": {
+  "mode": "grad",
+  "stops": [
+   [
+    0.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.11,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.82,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  ]
+ },
+ "spin": {
+  "rot": "0",
+  "rate": "0"
+ },
+ "curves": {}
+}

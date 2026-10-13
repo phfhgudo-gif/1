@@ -1,0 +1,74 @@
+{
+ "name": "garp_ult1_1_2",
+ "additive": false,
+ "facing": "flat",
+ "frames": 2,
+ "flipbook": null,
+ "uv_random": true,
+ "emitter": {
+  "mode": "instant",
+  "count": "10",
+  "rate": "0",
+  "maxp": 1000,
+  "active": 1
+ },
+ "shape": {
+  "type": "point",
+  "radius": "0",
+  "offset": [
+   "0",
+   "math.random(-2,2)",
+   "0"
+  ]
+ },
+ "speed": "0",
+ "accel": [
+  "0",
+  "0",
+  "0"
+ ],
+ "drag": 0,
+ "lifetime": "math.random(1,2)",
+ "size": [
+  "50+v.particle_random_2*20",
+  "50+v.particle_random_2*20"
+ ],
+ "tint": {
+  "mode": "grad",
+  "stops": [
+   [
+    0.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.47,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.79,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  ]
+ },
+ "spin": {
+  "rot": "math.random(-180,360)",
+  "rate": "5+v.particle_random_2*20"
+ },
+ "curves": {}
+}

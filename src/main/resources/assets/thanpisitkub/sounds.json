@@ -1,0 +1,21 @@
+{
+  "garp_ult1": {
+    "sounds": [{ "name": "thanpisitkub:garp_ult1", "stream": true }],
+    "subtitle": "subtitles.thanpisitkub.galaxy_impact"
+  },
+  "garp_galaxydivide": {
+    "sounds": [{ "name": "thanpisitkub:garp_galaxydivide", "stream": true }],
+    "subtitle": "subtitles.thanpisitkub.galaxy_divide"
+  },
+  "galaxy_impact_theme": {
+    "sounds": [{ "name": "thanpisitkub:galaxy_impact_theme", "stream": true }]
+  },
+  "galaxy": {
+    "sounds": [{ "name": "thanpisitkub:galaxy" }],
+    "subtitle": "subtitles.thanpisitkub.galaxy"
+  },
+  "impact": {
+    "sounds": [{ "name": "thanpisitkub:impact" }],
+    "subtitle": "subtitles.thanpisitkub.impact"
+  }
+}

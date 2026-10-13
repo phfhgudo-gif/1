@@ -1,0 +1,9 @@
+{
+  "powers": [
+    "thanpisitkub:galaxy_impact",
+    "thanpisitkub:galaxy_divide"
+  ],
+  "icon": { "item": "thanpisitkub:thanpisitkub_core" },
+  "order": 20,
+  "impact": 3
+}

@@ -1,0 +1,86 @@
+{
+ "name": "garp_skills4_1",
+ "additive": true,
+ "facing": "camera",
+ "frames": 6,
+ "flipbook": {
+  "fps": 10,
+  "max": 6,
+  "stretch": true,
+  "loop": false
+ },
+ "uv_random": false,
+ "emitter": {
+  "mode": "steady",
+  "rate": "10",
+  "count": "0",
+  "maxp": 100,
+  "active": 1
+ },
+ "shape": {
+  "type": "point",
+  "radius": "0",
+  "offset": [
+   "0",
+   "0",
+   "0"
+  ]
+ },
+ "speed": "0",
+ "accel": [
+  "0",
+  "0",
+  "0"
+ ],
+ "drag": 0,
+ "lifetime": "math.random(0.5,1)",
+ "size": [
+  "1+v.particle_random_2*2.5",
+  "1+v.particle_random_2*2.5"
+ ],
+ "tint": {
+  "mode": "grad",
+  "stops": [
+   [
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.2,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.5,
+    0.4196,
+    1.0,
+    0.4314,
+    0.0
+   ],
+   [
+    0.8,
+    0.0784,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  ]
+ },
+ "spin": {
+  "rot": "math.random(-360,360)",
+  "rate": "0"
+ },
+ "curves": {}
+}

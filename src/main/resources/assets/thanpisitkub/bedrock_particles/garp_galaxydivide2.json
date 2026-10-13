@@ -1,0 +1,79 @@
+{
+ "name": "garp_galaxydivide2",
+ "additive": false,
+ "facing": "flat",
+ "frames": 7,
+ "flipbook": {
+  "fps": 12,
+  "max": 7,
+  "stretch": true,
+  "loop": true
+ },
+ "uv_random": false,
+ "emitter": {
+  "mode": "steady",
+  "rate": "5",
+  "count": "0",
+  "maxp": 100,
+  "active": 1
+ },
+ "shape": {
+  "type": "point",
+  "radius": "0",
+  "offset": [
+   "0",
+   "math.random(-6,2)",
+   "0"
+  ]
+ },
+ "speed": "0",
+ "accel": [
+  "0",
+  "0",
+  "0"
+ ],
+ "drag": 0,
+ "lifetime": "math.random(0.5,1)",
+ "size": [
+  "4+v.particle_random_2*10",
+  "4+v.particle_random_2*10"
+ ],
+ "tint": {
+  "mode": "grad",
+  "stops": [
+   [
+    0.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.25,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    0.82,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   [
+    1.0,
+    0.0,
+    1.0,
+    1.0,
+    1.0
+   ]
+  ]
+ },
+ "spin": {
+  "rot": "math.random(-360,360)",
+  "rate": "v.particle_random_2*360"
+ },
+ "curves": {}
+}
