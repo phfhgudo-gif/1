@@ -54,6 +54,7 @@ public final class ClientMoveManager {
         int tick = 0;
         int fxIndex = 0;
         int soundIndex = 0;
+        double groundY;
         /** Recent emitters per particle: {tick, x, y, z}. Used so the same effect never stacks on itself. */
         final Map<String, List<double[]>> recentFx = new HashMap<>();
 
@@ -87,11 +88,11 @@ public final class ClientMoveManager {
 
         boolean local = mc.player != null && mc.player.getUUID().equals(id);
         ClientCast cast = new ClientCast(id, move, local);
+        cast.groundY = player.getY();
         CASTS.put(id, cast);
 
         if (PalCheck.isAvailable()) {
-            PalBridge.play(clientPlayer, ThanpisitkubMod.id(
-                    PowerConfig.ORIGINAL_ANIMATION.get() ? move.animation + "_original" : move.animation));
+            PalBridge.play(clientPlayer, ThanpisitkubMod.id(move.animation));
         } else if (!warnedMissingAnimationLib) {
             warnedMissingAnimationLib = true;
             ThanpisitkubMod.LOGGER.warn("Player Animation Library is not installed: Thanpisitkub moves will play without the body animation.");
@@ -162,7 +163,7 @@ public final class ClientMoveManager {
             double fwdX = -Math.sin(rad), fwdZ = Math.cos(rad);
             double leftX = Math.cos(rad), leftZ = Math.sin(rad);
             double x = player.getX() + fwdX * fx.forward() + leftX * fx.side();
-            double y = player.getY() + fx.up();
+            double y = (fx.ground() ? cast.groundY : player.getY()) + fx.up();
             double z = player.getZ() + fwdZ * fx.forward() + leftZ * fx.side();
             if (isStacked(cast, fx.particle(), x, y, z)) continue;
             spawnedThisTick++;

@@ -9,6 +9,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.TamableAnimal;
@@ -19,6 +22,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
@@ -41,11 +45,17 @@ public final class ServerMoveManager {
 
     private static final class ActiveCast {
         final MoveDef move;
+        final double groundY;
+        final boolean savedMayFly;
+        final boolean savedNoGravity;
         int tick = 0;
         int hitIndex = 0;
 
-        ActiveCast(MoveDef move) {
+        ActiveCast(MoveDef move, ServerPlayer player) {
             this.move = move;
+            this.groundY = player.getY();
+            this.savedMayFly = player.getAbilities().mayfly;
+            this.savedNoGravity = player.isNoGravity();
         }
     }
 
@@ -59,14 +69,34 @@ public final class ServerMoveManager {
     public static boolean cast(ServerPlayer player, MoveDef move) {
         if (!player.isAlive() || player.isSpectator()) return false;
         cancel(player);
-        CASTS.put(player.getUUID(), new ActiveCast(move));
+        ActiveCast cast = new ActiveCast(move, player);
+        CASTS.put(player.getUUID(), cast);
+        if (move.hasFlight()) {
+            // "may fly" stops the vanilla anti-fly kick while we carry the player through the sky
+            player.getAbilities().mayfly = true;
+            player.onUpdateAbilities();
+            player.setNoGravity(true);
+        }
         send(player, move.index, MoveStatePacket.START);
         return true;
     }
 
     public static void cancel(ServerPlayer player) {
         ActiveCast cast = CASTS.remove(player.getUUID());
-        if (cast != null) send(player, cast.move.index, MoveStatePacket.CANCEL);
+        if (cast != null) {
+            endFlight(player, cast);
+            send(player, cast.move.index, MoveStatePacket.CANCEL);
+        }
+    }
+
+    /** Gives gravity / flight permission back and cushions the landing. */
+    private static void endFlight(ServerPlayer player, ActiveCast cast) {
+        if (!cast.move.hasFlight()) return;
+        player.setNoGravity(cast.savedNoGravity);
+        player.getAbilities().mayfly = cast.savedMayFly;
+        player.onUpdateAbilities();
+        player.fallDistance = 0;
+        player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 120, 0, false, false, false));
     }
 
     private static void send(ServerPlayer player, int moveIndex, int mode) {
@@ -92,16 +122,24 @@ public final class ServerMoveManager {
                 CASTS.remove(uuid);
                 continue;
             }
+            // flight: steer the player to where the flight path wants them next tick (no horizontal drift)
+            if (cast.move.hasFlight()) {
+                double target = cast.groundY + cast.move.altitudeAt(cast.tick + 1);
+                double vy = Mth.clamp((target - player.getY()) * 0.9, -2.6, 2.6);
+                player.setDeltaMovement(0.0, vy, 0.0);
+                player.hurtMarked = true;
+            }
             // timeline hits that are due now
             List<MoveDef.Hit> hits = cast.move.hits;
             while (cast.hitIndex < hits.size() && hits.get(cast.hitIndex).tick() <= cast.tick) {
-                doHit(player, hits.get(cast.hitIndex));
+                doHit(player, cast, hits.get(cast.hitIndex));
                 cast.hitIndex++;
             }
             player.fallDistance = 0;
             cast.tick++;
             if (cast.tick >= cast.move.totalTicks && CASTS.get(uuid) == cast) {
                 CASTS.remove(uuid);
+                endFlight(player, cast);
                 final ServerPlayer p = player;
                 final int idx = cast.move.index;
                 afterLoop.add(() -> send(p, idx, MoveStatePacket.FINISH));
@@ -110,15 +148,17 @@ public final class ServerMoveManager {
         afterLoop.forEach(Runnable::run);
     }
 
-    private static void doHit(ServerPlayer caster, MoveDef.Hit hit) {
+    private static void doHit(ServerPlayer caster, ActiveCast cast, MoveDef.Hit hit) {
         ServerLevel level = caster.serverLevel();
-        Vec3 origin = caster.position();
+        // hits are measured from the GROUND under the caster (the caster may be flying high above it)
+        Vec3 origin = new Vec3(caster.getX(), cast.groundY, caster.getZ());
         Vec3 forward = Vec3.directionFromRotation(0.0f, caster.getYRot());
         float damage = (float) (hit.damage() * PowerConfig.DAMAGE_MULTIPLIER.get());
 
         AABB area;
         if (hit.shape() == MoveDef.HitShape.SPHERE) {
-            area = caster.getBoundingBox().inflate(hit.size());
+            area = new AABB(origin.x - hit.size(), origin.y - 4.0, origin.z - hit.size(),
+                    origin.x + hit.size(), origin.y + hit.size(), origin.z + hit.size());
         } else {
             Vec3 end = origin.add(forward.scale(hit.size()));
             area = new AABB(origin, end).inflate(hit.width() / 2.0 + 1.0, 4.0, hit.width() / 2.0 + 1.0);
@@ -172,12 +212,28 @@ public final class ServerMoveManager {
 
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) CASTS.remove(player.getUUID());
+        if (event.getEntity() instanceof ServerPlayer player) {
+            ActiveCast cast = CASTS.remove(player.getUUID());
+            if (cast != null) endFlight(player, cast);
+        }
     }
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) cancel(player);
+    }
+
+    /** Before the players are saved: give everybody their normal abilities back. */
+    @SubscribeEvent
+    public static void onServerStopping(ServerStoppingEvent event) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null) {
+            for (Map.Entry<UUID, ActiveCast> e : new ArrayList<>(CASTS.entrySet())) {
+                ServerPlayer p = server.getPlayerList().getPlayer(e.getKey());
+                if (p != null) endFlight(p, e.getValue());
+            }
+        }
+        CASTS.clear();
     }
 
     @SubscribeEvent

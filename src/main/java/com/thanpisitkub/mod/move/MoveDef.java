@@ -12,7 +12,8 @@ import java.util.List;
 public final class MoveDef {
 
     /** A particle emitter spawned relative to the caster (forward = where the caster faces). */
-    public record Fx(int tick, String particle, double forward, double side, double up) {
+    /** {@code ground}: height is measured from the ground the caster started on, not from the caster (who may be flying). */
+    public record Fx(int tick, String particle, double forward, double side, double up, boolean ground) {
     }
 
     /** A sound that follows the caster. {@code volume} above 1.0 only widens the audible range. */
@@ -21,6 +22,9 @@ public final class MoveDef {
 
     /** Camera shake on the caster's screen: {@code strength} fades out linearly over {@code durationTicks}. */
     public record Shake(int tick, float strength, int durationTicks) {
+    }
+
+    public record Alt(int tick, double height) {
     }
 
     public enum HitShape {SPHERE, LINE}
@@ -40,6 +44,8 @@ public final class MoveDef {
     public final List<Snd> sounds;
     public final List<Hit> hits;
     public final List<Shake> shakes;
+    /** Flight path: height above the starting ground (blocks) over time; empty = the caster stays on the ground. */
+    public final List<Alt> altitude;
 
     private MoveDef(Builder b) {
         this.id = b.id;
@@ -53,6 +59,27 @@ public final class MoveDef {
         this.sounds = List.copyOf(b.sounds);
         this.hits = List.copyOf(b.hits);
         this.shakes = List.copyOf(b.shakes);
+        b.altitude.sort(Comparator.comparingInt(Alt::tick));
+        this.altitude = List.copyOf(b.altitude);
+    }
+
+    public boolean hasFlight() {
+        return !altitude.isEmpty();
+    }
+
+    /** Height above the starting ground at the given time (ticks, may be fractional). */
+    public double altitudeAt(double tick) {
+        if (altitude.isEmpty()) return 0.0;
+        Alt first = altitude.get(0);
+        if (tick <= first.tick()) return first.height();
+        for (int i = 1; i < altitude.size(); i++) {
+            Alt a = altitude.get(i - 1), c = altitude.get(i);
+            if (tick <= c.tick()) {
+                double u = c.tick() == a.tick() ? 1.0 : (tick - a.tick()) / (c.tick() - a.tick());
+                return a.height() + (c.height() - a.height()) * u;
+            }
+        }
+        return altitude.get(altitude.size() - 1).height();
     }
 
     public static Builder builder(String id, int index, String animation, double totalSeconds) {
@@ -72,6 +99,8 @@ public final class MoveDef {
         private final List<Snd> sounds = new ArrayList<>();
         private final List<Hit> hits = new ArrayList<>();
         private final List<Shake> shakes = new ArrayList<>();
+        private final List<Alt> altitude = new ArrayList<>();
+        private boolean groundMode = false;
 
         private Builder(String id, int index, String animation, double totalSeconds) {
             this.id = id;
@@ -80,9 +109,36 @@ public final class MoveDef {
             this.totalTicks = ticks(totalSeconds);
         }
 
+        /** From now on, effects measure their height from the ground (true) or from the caster (false). */
+        public Builder ground(boolean on) {
+            this.groundMode = on;
+            return this;
+        }
+
+        /** A point of the flight path: the caster should be {@code height} blocks above the start ground at {@code sec}. */
+        public Builder alt(double sec, double height) {
+            altitude.add(new Alt(ticks(sec), height));
+            return this;
+        }
+
+        /** A smooth change of height; ease: "smooth", "in" (accelerating) or "out" (decelerating). */
+        public Builder altRamp(double fromSec, double toSec, double fromHeight, double toHeight, String ease) {
+            int steps = Math.max(2, (int) Math.round((toSec - fromSec) * 5));
+            for (int i = 0; i <= steps; i++) {
+                double u = (double) i / steps;
+                double e = switch (ease) {
+                    case "in" -> u * u;
+                    case "out" -> 1 - (1 - u) * (1 - u);
+                    default -> u * u * (3 - 2 * u);
+                };
+                alt(fromSec + (toSec - fromSec) * u, fromHeight + (toHeight - fromHeight) * e);
+            }
+            return this;
+        }
+
         /** One emitter at a moment in time. */
         public Builder fx(double sec, String particle, double forward, double side, double up) {
-            fx.add(new Fx(ticks(sec), particle, forward, side, up));
+            fx.add(new Fx(ticks(sec), particle, forward, side, up, groundMode));
             return this;
         }
 

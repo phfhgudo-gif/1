@@ -22,7 +22,6 @@ public final class PowerConfig {
     public static final ForgeConfigSpec.BooleanValue THIRD_PERSON;
     public static final ForgeConfigSpec.DoubleValue CAMERA_SHAKE;
     public static final ForgeConfigSpec.DoubleValue SOUND_VOLUME;
-    public static final ForgeConfigSpec.BooleanValue ORIGINAL_ANIMATION;
 
     static {
         ForgeConfigSpec.Builder c = new ForgeConfigSpec.Builder();
@@ -51,9 +50,6 @@ public final class PowerConfig {
                 .defineInRange("cameraShake", 1.0, 0.0, 5.0);
         SOUND_VOLUME = v.comment("Loudness of the move sounds (0 = silent, 1 = the original files at full volume).")
                 .defineInRange("soundVolume", 0.6, 0.0, 1.0);
-        ORIGINAL_ANIMATION = v.comment("false (default) = 'safe' body animation: the extreme torso flips / body offsets are limited so the",
-                "body never detaches or folds in half. true = your original, unmodified animation files.")
-                .define("originalAnimation", false);
         v.pop();
         CLIENT_SPEC = v.build();
     }

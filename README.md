@@ -55,13 +55,16 @@ mod id: `thanpisitkub` · Minecraft 1.20.1 · Forge 47.x · Java 17
 (ถ้าไม่ได้ใช้ Origins ไฟล์พวกนี้ไม่มีผลอะไร)
 
 
-## เรื่อง Animation (Player Animation Library 1.0.2-rc1+1.20)
+## เรื่อง Animation และการบิน
 
-- PAL 1.0.2 อ่านค่า rotation แบบ array เป็น **step (ค้างค่า ไม่ interpolate)** ถ้า keyframe ห่างกัน ท่าจะกระตุก/ค้างเป็นช่วง ๆ
-  จึงแปลงไฟล์ท่าให้มี keyframe **ทุก tick** ด้วย `tools/resample_animation.py` (ไฟล์ต้นฉบับของคุณเก็บไว้ที่ `tools/original_animations/`)
-- ท่ามี 2 แบบ: `galaxy_*.json` (safe: จำกัดการก้ม/เอียงลำตัวไม่เกิน ~15° เพราะลำตัวของตัวละครหมุนรอบ "คอ" ถ้าก้มมากสะโพกจะแยกจากขา) และ `galaxy_*_original.json` (ท่าต้นฉบับ) สลับด้วย `originalAnimation` ใน client config
-- ถ้าอยากแก้ท่าเอง: แก้ไฟล์ใน `tools/original_animations/` แล้วรัน `python3 tools/build_animations.py`
-- (แก้คำอธิบายเดิม: ก่อนหน้านี้เคยบอกว่า bug มาจาก rotation ถูกอ่านเป็น radian — ตรวจโค้ดจริงแล้วไม่ใช่ PAL แปลงองศาเป็น radian ให้อยู่แล้ว)
+- ท่าทั้งสองสร้างด้วยสคริปต์ `tools/make_animation.py` (ใช้ `tools/anim_rig.py`): เขียนท่าเป็น "โครงตัวละคร" ที่ลำตัว/หัว/แขน
+  หมุนรอบสะโพกจริง ๆ (ก้ม/พุ่งหัวทิ่มได้โดยตัวไม่แยก) แล้ว bake เป็นคีย์เฟรมทุก tick ลงใน `player_animation/*.json`
+  แก้ท่า: แก้เวลา/มุมใน `make_animation.py` แล้วรัน `python3 tools/make_animation.py --preview`
+  (ต้องมี numpy + matplotlib; `--preview` สร้างรูปพรีวิวท่าให้ดู, ตั้งโฟลเดอร์ด้วย `PREVIEW_DIR=...`)
+- ท่าเก่าของคุณเก็บไว้ที่ `tools/original_animations/` (ไม่ได้ใช้แล้ว)
+- ตอนใช้ท่า ผู้เล่นจะบินขึ้นฟ้าจริง (เซิร์ฟเวอร์ควบคุมความสูงตามเส้นทางใน `Moves.java` → `b.alt(...)`):
+  Galaxy Impact ไต่ขึ้น 44 บล็อก แล้วพุ่งลงมากระแทกพื้นตอนจบ · Galaxy Divide ลอยขึ้น 32 บล็อกแล้วค่อย ๆ ลงมา
+  ดาเมจวัดจากพื้นใต้ตัวผู้ใช้ ไม่ได้วัดจากตำแหน่งที่ลอยอยู่ และจบท่าจะได้ Slow Falling สั้น ๆ กันตกตาย
 
 ## ข้อควรรู้
 

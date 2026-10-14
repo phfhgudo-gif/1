@@ -54,6 +54,13 @@ public final class Moves {
         b.sound(6.9, "impact", 1.0f, 1.0f);
         b.sound(17.2, "impact", 1.0f, 0.9f);
 
+        // --- flight: gather on the ground, spiral up to 44 blocks, hover through the punches, dive down at 17.3 s
+        b.alt(0.0, 0.0).alt(3.4, 0.0);
+        b.altRamp(3.4, 6.4, 0.0, 44.0, "smooth");
+        b.alt(8.5, 44.6).alt(10.5, 43.6).alt(12.5, 44.6).alt(15.0, 44.0).alt(15.5, 44.0);
+        b.altRamp(15.5, 17.3, 44.0, 0.0, "in");
+        b.alt(27.0, 0.0);
+
         // --- camera ------------------------------------------------------------------------------
         b.shake(0.5, 0.4, 2.8);
         b.shake(3.4, 0.9, 2.0);
@@ -72,7 +79,7 @@ public final class Moves {
 
         // --- a galaxy opens overhead and stays (3.4 s ->) ---------------------------------------------
         b.fxEvery(3.4, 25.4, 1.0, "garp_ult1_1_2", 0, 0, 24);
-        b.fx(9.0, "garp_ult1_1", 0, 0, 0.1);
+        b.ground(true).fx(9.0, "garp_ult1_1", 0, 0, 0.1).ground(false);
         b.fxEvery(3.6, 13.6, 1.5, "garp_ult1_3_3", 0, 0, 1.0);
 
         // --- punch 1 (6.9 s) -----------------------------------------------------------------
@@ -90,6 +97,13 @@ public final class Moves {
         b.fx(15.4, "garp_ult1_6", 0, 0, 0.1);
         b.fx(15.5, "garp_ult1_2_2", 3.0, 0, 1.4);
         b.sphereHit(15.5, 18, 10f, 1.2, 0.5);
+
+        // the punches in the sky send shockwaves down onto the ground far below
+        b.ground(true);
+        b.fxRing(7.0, "garp_ult1_2_2", 5, 9, 1.0, 0);
+        b.fxRing(14.0, "garp_ult1_2_2", 5, 12, 1.0, 36);
+        b.fxRing(15.5, "garp_ult1_4_2", 6, 14, 1.0, 0);
+        b.ground(false);
 
         // --- finale (17.4 s) ---------------------------------------------------------------------
         b.fx(17.4, "garp_ult1_2_2", 3.0, 0, 1.5);
@@ -148,6 +162,14 @@ public final class Moves {
         // --- sound: one track only (it carries its own voice) ------------------------------------------
         b.sound(0.0, "garp_galaxydivide", 0.6f, 1.0f);
 
+        // --- flight: slashes on the ground, rise to 32 blocks while gathering (12.5 - 16 s), cut and climax from
+        //     the sky, float back down 23.5 - 26.5 s
+        b.alt(0.0, 0.0).alt(12.5, 0.0);
+        b.altRamp(12.5, 16.0, 0.0, 32.0, "smooth");
+        b.alt(18.5, 32.8).alt(21.0, 31.6).alt(23.5, 32.0);
+        b.altRamp(23.5, 26.5, 32.0, 0.0, "smooth");
+        b.alt(27.5, 0.0);
+
         // --- camera ------------------------------------------------------------------------------
         b.shake(0.0, 0.6, 1.5);
         b.shake(1.5, 1.6, 0.6);
@@ -183,7 +205,8 @@ public final class Moves {
         b.fx(15.0, "garp_ult4_2", 0, 0, 0.5);
         b.fxEvery(13.0, 16.0, 0.75, "garp_galaxydivide2", 0, 0, 0.2);
 
-        // --- main divide (16.5 s): a wave cuts 64 blocks straight ahead ------------------------------
+        // --- main divide (16.5 s): a wave cuts 64 blocks straight ahead (measured from the GROUND) ---------
+        b.ground(true);
         b.fx(16.5, "garp_galaxydivide1", 4, 0, 1.4);
         b.fx(16.7, "garp_galaxydivide1", 14, 0, 1.4);
         b.fx(16.9, "garp_galaxydivide1", 26, 0, 1.4);
@@ -197,6 +220,7 @@ public final class Moves {
         b.fx(17.2, "garp_ult4_5", 38, 0, 0.3);
         b.lineHit(16.8, 64, 10, 25f, 1.5, 0.5);
 
+        b.ground(false);
         // --- while the final pose is held (17.5 - 22.3 s): the galaxy gathers above --------------------
         b.fxEvery(18.0, 22.0, 1.0, "garp_ult1_1_2", 0, 0, 24);
         b.fxEvery(17.8, 22.0, 0.7, "garp_ult4_5_2", 0, 0, 0.4);
@@ -208,6 +232,7 @@ public final class Moves {
         b.fx(21.5, "garp_galaxydivide1", 5, 0, 1.4);
 
         // --- climax (22.3 s): light pillars along the cut, then the shockwave rolls on ---------------
+        b.ground(true);
         b.fx(22.3, "garp_ult4_2_3", 8, 0, 30);
         b.fx(22.4, "garp_ult4_2_3", 20, 0, 30);
         b.fx(22.5, "garp_ult4_2_3", 32, 0, 30);
