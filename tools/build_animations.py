@@ -19,8 +19,11 @@ SRC = os.path.join(ROOT, "tools", "original_animations")
 OUT = os.path.join(ROOT, "src", "main", "resources", "assets", "thanpisitkub", "player_animation")
 
 # bone -> channel -> per-axis (min, max)
+# Why the torso pitch/roll is so small: the vanilla player torso pivots at the NECK, so every degree of pitch/roll
+# swings the hips away from the legs (12 px * sin(angle)). 15 deg = ~3 px gap, 55 deg = a visibly detached body.
+# Yaw (twist around the spine) never opens a gap, so it keeps a wide range.
 SAFE_LIMITS = {
-    "torso": {"rotation": [(-25, 55), (-45, 45), (-30, 30)], "position": [(-2, 2), (-2, 2), (-2, 2)]},
+    "torso": {"rotation": [(-15, 15), (-60, 60), (-12, 12)], "position": [(-2, 2), (-2, 2), (-2, 2)]},
     "right_arm": {"position": [(-4, 4)] * 3},
     "left_arm": {"position": [(-4, 4)] * 3},
     "right_leg": {"position": [(-4, 4)] * 3},

@@ -45,13 +45,14 @@ public final class Moves {
     private static MoveDef galaxyImpact() {
         MoveDef.Builder b = MoveDef.builder("galaxy_impact", 0, "galaxy_impact", 27.0);
 
-        // --- sound: one main track + the spoken "Galaxy" / "Impact" shouts, never overlapping ----------------
-        // (galaxy.ogg = 4.4 s with ~0.5 s of lead-in silence, impact.ogg = 4.0 s; each shout starts after the last ended)
-        b.sound(0.0, "garp_ult1", 0.6f, 1.0f);
-        b.sound(2.4, "galaxy", 1.0f, 1.0f);   // "Galaxy ..."  (ends ~6.8 s)
-        b.sound(6.9, "impact", 1.0f, 1.0f);   // "... Impact!" on the first punch (ends ~10.9 s)
-        b.sound(12.9, "galaxy", 1.0f, 1.0f);  // second call before the finale (ends ~17.3 s)
-        b.sound(17.4, "impact", 1.0f, 0.9f);  // finale
+        // --- sound ---------------------------------------------------------------------------------
+        // main track = music + effects (kept lower so the voice is heard); the voice lines are two separate files,
+        // each ~4 s with the spoken word about 0.5-3.5 s in: "Galaxy" while the galaxy opens, "Impact" on the
+        // first punch and again on the finale. They never overlap each other.
+        b.sound(0.0, "garp_ult1", 0.45f, 1.0f);
+        b.sound(2.9, "galaxy", 1.0f, 1.0f);
+        b.sound(6.9, "impact", 1.0f, 1.0f);
+        b.sound(17.2, "impact", 1.0f, 0.9f);
 
         // --- camera ------------------------------------------------------------------------------
         b.shake(0.5, 0.4, 2.8);
@@ -144,8 +145,8 @@ public final class Moves {
     private static MoveDef galaxyDivide() {
         MoveDef.Builder b = MoveDef.builder("galaxy_divide", 1, "galaxy_divide", 27.5);
 
-        // --- sound: just the main track (it is the whole soundtrack of this move) ---------------------
-        b.sound(0.0, "garp_galaxydivide", 0.7f, 1.0f);
+        // --- sound: one track only (it carries its own voice) ------------------------------------------
+        b.sound(0.0, "garp_galaxydivide", 0.6f, 1.0f);
 
         // --- camera ------------------------------------------------------------------------------
         b.shake(0.0, 0.6, 1.5);

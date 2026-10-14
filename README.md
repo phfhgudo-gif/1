@@ -59,7 +59,7 @@ mod id: `thanpisitkub` · Minecraft 1.20.1 · Forge 47.x · Java 17
 
 - PAL 1.0.2 อ่านค่า rotation แบบ array เป็น **step (ค้างค่า ไม่ interpolate)** ถ้า keyframe ห่างกัน ท่าจะกระตุก/ค้างเป็นช่วง ๆ
   จึงแปลงไฟล์ท่าให้มี keyframe **ทุก tick** ด้วย `tools/resample_animation.py` (ไฟล์ต้นฉบับของคุณเก็บไว้ที่ `tools/original_animations/`)
-- ท่ามี 2 แบบ: `galaxy_*.json` (safe: จำกัดการพลิกลำตัว/การยกตัวที่สุดโต่ง) และ `galaxy_*_original.json` (ท่าต้นฉบับ) สลับด้วย `originalAnimation` ใน client config
+- ท่ามี 2 แบบ: `galaxy_*.json` (safe: จำกัดการก้ม/เอียงลำตัวไม่เกิน ~15° เพราะลำตัวของตัวละครหมุนรอบ "คอ" ถ้าก้มมากสะโพกจะแยกจากขา) และ `galaxy_*_original.json` (ท่าต้นฉบับ) สลับด้วย `originalAnimation` ใน client config
 - ถ้าอยากแก้ท่าเอง: แก้ไฟล์ใน `tools/original_animations/` แล้วรัน `python3 tools/build_animations.py`
 - (แก้คำอธิบายเดิม: ก่อนหน้านี้เคยบอกว่า bug มาจาก rotation ถูกอ่านเป็น radian — ตรวจโค้ดจริงแล้วไม่ใช่ PAL แปลงองศาเป็น radian ให้อยู่แล้ว)
 
